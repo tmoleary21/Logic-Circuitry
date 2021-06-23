@@ -63,6 +63,7 @@ implements MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, 
 		onScreenElements.add(new outputLED(40, 120));
 		onScreenElements.add(new AndGate(40, 200));
 		onScreenElements.add(new OrGate(40, 300));
+		onScreenElements.add(new InputSwitch(40, 400));
 		alt = false;
 	}
 	
@@ -106,6 +107,7 @@ implements MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, 
 				if(node.contains(e.getX(), e.getY())) {
 					selectedWire = node.createWire();
 					wires.add(selectedWire);
+					selectedWire.startExtension();
 					return;
 				}
 			}

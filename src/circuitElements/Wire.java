@@ -48,6 +48,9 @@ public class Wire{
 	}
 	
 	public Line getLastSegment() {
+		if(segments.size() == 0) {
+			return new Line(startx, starty, startx, starty);
+		}
 		return segments.get(segments.size()-1);
 	}
 	
@@ -56,46 +59,77 @@ public class Wire{
 		this.starty = starty;
 	}
 	
+	//Deprecated 
 	public void addSegment(int endx, int endy) {
 		Line lastSegment = this.getLastSegment();
 		segments.add(new Line(lastSegment.getX2(), lastSegment.getY2(), endx, endy));
 	}
 	
-	//This is only run while the mouse is held/dragging
-	public void extender(MouseEvent e, int prevMouseX, int prevMouseY) {
-		Line lastSegment = getLastSegment();
+	public void startExtension() {
+		if(startNode.parent.orientation == CircuitElement.UP || startNode.parent.orientation == CircuitElement.DOWN) {
+			horizontalPrimary = false;
+			verticalSegment = new Line(startx, starty, startx, starty);
+			horizontalSegment = new Line(verticalSegment.getX2(), verticalSegment.getY2(), verticalSegment.getX2(), verticalSegment.getY2());
+		}
+		else {
+			horizontalPrimary = true;
+			horizontalSegment = new Line(startx, starty, startx, starty);
+			verticalSegment = new Line(horizontalSegment.getX2(), horizontalSegment.getY2(), horizontalSegment.getX2(), horizontalSegment.getY2());
+		}
+	}
+	
+	//Returns a string representation of the triangular region the mouse is in 
+	//relative to the node this wire is connected to
+	//Returns "top", "bottom", "left", or "right"
+	private String getMouseRegion(MouseEvent e) {
 		int mouseGridX = Math.round(e.getX() / 10) * 10;
 		int mouseGridY = Math.round(e.getY() / 10) * 10;
-		System.out.println("Mouse on Grid: " + mouseGridX + ", " + mouseGridY);
-		System.out.println(startx + ", " + starty);
-		
-		if( ((mouseGridY < (mouseGridX - startx) + starty) && (mouseGridY < -(mouseGridX - startx) + starty) 
-			|| (mouseGridY > (mouseGridX - startx) + starty) && (mouseGridY > -(mouseGridX - startx) + starty) //Checks if mouse is within upper or lower quadrant.(separated by y = x lines centered on (startx,starty)
-			|| (verticalSegment.length() != 0 && Line.linesIntersect(verticalSegment.getX1(),verticalSegment.getY1(),verticalSegment.getX2(),verticalSegment.getY2(),e.getX(),e.getY(),prevMouseX,prevMouseY)/*verticalSegment.getX1() == startx*/)) //Checks if there is already some vertical segment created as primary
-			&& !horizontalPrimary)
-		{
-			System.out.println("Top/Bottom region");
-			verticalSegment = new Line(lastSegment.getX2(), lastSegment.getY2(), lastSegment.getX2(), mouseGridY);
-			horizontalSegment = new Line(verticalSegment.getX2(), verticalSegment.getY2(), mouseGridX, verticalSegment.getY2());
+		if((mouseGridY < (mouseGridX - startx) + starty) && (mouseGridY < -(mouseGridX - startx) + starty)) {
+			return "top";
 		}
-		else if( (mouseGridX < (mouseGridY - starty) + startx) && (mouseGridX < -(mouseGridY - starty) + startx) 
-			|| (mouseGridX > (mouseGridY - starty) + startx) && (mouseGridX > -(mouseGridY - starty) + startx) //Checks if mouse is within right or left quadrant
-			|| (horizontalSegment.length() != 0 && /*Line.linesIntersect(horizontalSegment.getX1(),horizontalSegment.getY1(),horizontalSegment.getX2(),horizontalSegment.getY2(),e.getX(),e.getY(),prevMouseX,prevMouseY)*/horizontalSegment.getY1() == starty) )// Checks if there is already some horizontal segment created as primary
-		{
-			System.out.println("Right/Left region");
-			horizontalPrimary = true;
-			horizontalSegment = new Line(lastSegment.getX2(), lastSegment.getY2(), mouseGridX, lastSegment.getY2());
-			verticalSegment = new Line(horizontalSegment.getX2(), horizontalSegment.getY2(), horizontalSegment.getX2(), mouseGridY);
-			if(horizontalSegment.length() == 0) {
+		if((mouseGridY > (mouseGridX - startx) + starty) && (mouseGridY > -(mouseGridX - startx) + starty)) {
+			return "bottom";
+		}
+		if((mouseGridX < (mouseGridY - starty) + startx) && (mouseGridX < -(mouseGridY - starty) + startx)) {
+			return "left";
+		}
+		if((mouseGridX > (mouseGridY - starty) + startx) && (mouseGridX > -(mouseGridY - starty) + startx)) {
+			return "right";
+		}
+		return "";
+	}
+	
+	//Checks the vertical/horizontal segments and swaps if necessary
+	public void setPrimary(int mouseGridX, int mouseGridY, int prevMouseX, int prevMouseY) {
+		if(horizontalPrimary) {
+			//Mouse crosses vertical
+			if(Line.linesIntersect(prevMouseX, prevMouseY, mouseGridX, mouseGridY, startx, prevMouseY, startx, mouseGridY)) {
+				System.out.println("Swap to vertical primary");
 				horizontalPrimary = false;
 			}
 		}
-		else { //Case for being right on boundary lines between quadrants. Currently just sets to 0 length lines.
-			System.out.println("else case");
-			verticalSegment = new Line(lastSegment.getX2(), lastSegment.getY2(),lastSegment.getX2(),lastSegment.getY2());
-			horizontalSegment = new Line(lastSegment.getX2(), lastSegment.getY2(),lastSegment.getX2(),lastSegment.getY2());
+		else {
+			//Mouse crosses horizontal
+			if(Line.linesIntersect(prevMouseX, prevMouseY, mouseGridX, mouseGridY, prevMouseX, starty, mouseGridX , starty)) {
+				System.out.println("Swap to horizontal primary");
+				horizontalPrimary = true;
+			}
 		}
-		
+	}
+	
+	//This is only run while the mouse is held/dragging
+	public void extender(MouseEvent e, int prevMouseX, int prevMouseY) {
+		int mouseGridX = Math.round(e.getX() / 10) * 10;
+		int mouseGridY = Math.round(e.getY() / 10) * 10;
+		setPrimary(mouseGridX, mouseGridY, prevMouseX, prevMouseY);
+		if(horizontalPrimary) {
+			horizontalSegment = new Line(startx, starty, mouseGridX, starty);
+			verticalSegment = new Line(mouseGridX, starty, mouseGridX, mouseGridY); //Extends off horizontalSegment
+		}
+		else {
+			verticalSegment = new Line(startx, starty, startx, mouseGridY);
+			horizontalSegment = new Line(startx, mouseGridY, mouseGridX, mouseGridY); //Extends off verticalSegment
+		}
 	}
 	
 	public void diagonalExtender(MouseEvent e) {

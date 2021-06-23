@@ -8,10 +8,10 @@ public abstract class CircuitElement {
 	public int y;
 	
 	public int orientation;
-	public final int RIGHT = 0;
-	public final int DOWN = 1;
-	public final int LEFT = 2;
-	public final int UP = 3;
+	public static final int RIGHT = 0;
+	public static final int DOWN = 1;
+	public static final int LEFT = 2;
+	public static final int UP = 3;
 	
 	public Node[] nodes;
 	
