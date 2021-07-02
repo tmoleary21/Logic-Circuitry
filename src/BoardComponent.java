@@ -30,7 +30,7 @@ import gates.OrGate;
 
 @SuppressWarnings("serial")
 public class BoardComponent extends JComponent 
-implements MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, ActionListener{
+implements MouseMotionListener, MouseListener, MouseWheelListener, ActionListener{
 	
 	ArrayList<CircuitElement> onScreenElements;
 	ArrayList<Wire> wires;
@@ -55,7 +55,6 @@ implements MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, 
 		addMouseMotionListener(this);
 		addMouseListener(this);
 		addMouseWheelListener(this);
-		addKeyListener(this);
 		
 		//Temporary spot for initializing CircuitElements to show on screen. Eventually, will be initialized on their respective factory classes
 		onScreenElements.add(new NotGate(40, 40));
@@ -211,25 +210,6 @@ implements MouseMotionListener, MouseListener, MouseWheelListener, KeyListener, 
 				LMBSelection.rotateLeft();
 			}
 		}
-	}
-
-	/**TODO: Seems like I need to use KEYBINDINGS instead of these methods for some reason 
-	 * 		 Not sure why these don't work though										*/
-	@Override
-	public void keyPressed(KeyEvent e) {
-		System.out.println("key code: " + e.getKeyCode());
-		if(e.getKeyCode() == KeyEvent.VK_ALT) {
-			alt = true;
-		}
-	}
-	@Override
-	public void keyReleased(KeyEvent e) {
-		System.out.println("Released");
-		alt = false;
-	}
-	@Override
-	public void keyTyped(KeyEvent e) {
-		System.out.println("Typed");
 	}
 
 }
