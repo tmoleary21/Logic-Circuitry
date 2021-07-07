@@ -133,13 +133,33 @@ public class Wire{
 	}
 	
 	public void diagonalExtender(MouseEvent e) {
-		Line lastSegment = getLastSegment();
+		horizontalSegment = new Line(startx, starty, startx, starty);
 		int mouseGridX = Math.round(e.getX() / 10) * 10;
 		int mouseGridY = Math.round(e.getY() / 10) * 10;
-		verticalSegment = new Line(lastSegment.getX2(), 
-								   lastSegment.getY2(), 
-								   lastSegment.getX2()+Math.max(mouseGridX-lastSegment.getX2(), mouseGridY-lastSegment.getY2()), 
-								   lastSegment.getY2()+Math.max(mouseGridX-lastSegment.getX2(), mouseGridY-lastSegment.getY2()));
+		/* Quadrants:
+		 * 3	|	4
+		 * 		|
+		 * -----------
+		 * 		|			
+		 * 	2	| 	1
+		 */
+		int length = Math.max(Math.abs(mouseGridX-startx), Math.abs(mouseGridY-starty));
+		if(mouseGridX-startx >= 0 && mouseGridY-starty >= 0) {
+			//Quadrant 1
+			verticalSegment = new Line(startx, starty, startx+length, starty+length);
+		}
+		else if(mouseGridX-startx <= 0 && mouseGridY-starty <= 0) {
+			//Quadrant 3
+			verticalSegment = new Line(startx, starty, startx-length, starty-length);			
+		}
+		else if(mouseGridX-startx >= 0 && mouseGridY-starty <= 0) {
+			//Quadrant 4
+			verticalSegment = new Line(startx, starty, startx+length, starty-length);
+		}
+		else {
+			//Quadrant 2
+			verticalSegment = new Line(startx, starty, startx-length, starty+length);
+		}
 	}
 	
 	public void addExtension() {

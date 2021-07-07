@@ -41,7 +41,6 @@ implements MouseMotionListener, MouseListener, MouseWheelListener, ActionListene
 	Wire selectedWire;
 	
 	int prevMouseX, prevMouseY;
-	boolean alt;
 	
 	private Timer timer;
 	final int DELAY = 1000/60;
@@ -68,7 +67,6 @@ implements MouseMotionListener, MouseListener, MouseWheelListener, ActionListene
 		onScreenElements.add(new AndGate(40, 200));
 		onScreenElements.add(new OrGate(40, 300));
 		onScreenElements.add(new InputSwitch(40, 400));
-		alt = false;
 	}
 	
 	public void paintComponent(Graphics g) {
