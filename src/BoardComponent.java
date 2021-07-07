@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -15,6 +16,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.Color;
 
 import javax.swing.JComponent;
+import javax.swing.KeyStroke;
 import javax.swing.Timer; // Runs on the EDT (Event Dispatch Thread), which is the thread that all swing tasks run off of.
 //Tasks are sent to a queue on the EDT and run sequentially. Need to be careful what is sent and how often something is sent to the EDT to prevent lag.
 
@@ -52,9 +54,12 @@ implements MouseMotionListener, MouseListener, MouseWheelListener, ActionListene
 		timer = new Timer(DELAY, this);
 		timer.start();
 		
+		//Action Listeners
 		addMouseMotionListener(this);
 		addMouseListener(this);
 		addMouseWheelListener(this);
+		
+		//Keybindings
 		
 		//Temporary spot for initializing CircuitElements to show on screen. Eventually, will be initialized on their respective factory classes
 		onScreenElements.add(new NotGate(40, 40));
@@ -159,7 +164,7 @@ implements MouseMotionListener, MouseListener, MouseWheelListener, ActionListene
 			LMBSelection.setLocation((int)Math.round(e.getX() / 10.0) * 10, (int)Math.round(e.getY() / 10.0) * 10);		
 		}
 		if(selectedWire != null) { //Wire
-			if(alt) {
+			if(e.isAltDown()) { //Apparently there's this nice method for mouseevent called "isAltDown()"
 				selectedWire.diagonalExtender(e);
 			}
 			else {
