@@ -13,9 +13,20 @@ public class Node {
 	private Ellipse2DCenter nodeShape;
 	private Ellipse2DCenter selectionCircle;
 	
-	CircuitElement parent;
+	Object parent;
 	
 	public Node(double x, double y, int value, boolean isOutput, CircuitElement parentOfNode) {
+		this.x = x;
+		this.y = y;
+		this.value = value;
+		this.hovering = false;
+		nodeShape = new Ellipse2DCenter(0,0,0,0);
+		selectionCircle = new Ellipse2DCenter(0,0,0,0);
+		this.isOutput = isOutput;
+		this.parent = parentOfNode;
+	}
+	
+	public Node(double x, double y, int value, boolean isOutput, Wire parentOfNode) {
 		this.x = x;
 		this.y = y;
 		this.value = value;
@@ -76,6 +87,15 @@ public class Node {
 	
 	public void updateValue(int value) {
 		this.value = value;
+	}
+	
+	public int getParentOrientation() {
+		if(parent instanceof CircuitElement) {
+			return ((CircuitElement) parent).orientation;
+		}
+		else { //instance of Wire
+			return ((Wire) parent).getPointDirection();
+		}
 	}
 	
 	public String toString() {

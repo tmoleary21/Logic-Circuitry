@@ -130,7 +130,6 @@ implements MouseMotionListener, MouseListener, MouseWheelListener, ActionListene
 		}
 		
 		if(selectedWire != null) {
-			selectedWire.addExtension();
 			//Check if hovering over node when released
 			for(CircuitElement element : onScreenElements) {
 				for(Node node : element.nodes) {
@@ -142,6 +141,7 @@ implements MouseMotionListener, MouseListener, MouseWheelListener, ActionListene
 					}
 				}
 			}
+			selectedWire.addExtension();
 			
 		}
 		

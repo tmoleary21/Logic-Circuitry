@@ -15,6 +15,7 @@ public class Wire{
 	private ArrayList<Line> segments;
 	Node startNode;
 	Node endNode;
+	public boolean endNodeLocal;
 	
 	//Temporary segments used when extending wire
 	private Line verticalSegment;
@@ -45,6 +46,9 @@ public class Wire{
 		if(horizontalSegment != null) {
 			painter.draw(horizontalSegment);
 		}
+		if(endNode != null && endNodeLocal) {
+			endNode.paint(painter);
+		}
 	}
 	
 	public Line getLastSegment() {
@@ -66,7 +70,7 @@ public class Wire{
 	}
 	
 	public void startExtension() {
-		if(startNode.parent.orientation == CircuitElement.UP || startNode.parent.orientation == CircuitElement.DOWN) {
+		if(startNode.getParentOrientation() == CircuitElement.UP || startNode.getParentOrientation() == CircuitElement.DOWN) {
 			horizontalPrimary = false;
 			verticalSegment = new Line(startx, starty, startx, starty);
 			horizontalSegment = new Line(verticalSegment.getX2(), verticalSegment.getY2(), verticalSegment.getX2(), verticalSegment.getY2());
@@ -100,7 +104,7 @@ public class Wire{
 	}
 	
 	//Checks the vertical/horizontal segments and swaps if necessary
-	public void setPrimary(int mouseGridX, int mouseGridY, int prevMouseX, int prevMouseY) {
+	private void setPrimary(int mouseGridX, int mouseGridY, int prevMouseX, int prevMouseY) {
 		if(horizontalPrimary) {
 			//Mouse crosses vertical
 			if(Line.linesIntersect(prevMouseX, prevMouseY, mouseGridX, mouseGridY, startx, prevMouseY, startx, mouseGridY)) {
@@ -163,18 +167,49 @@ public class Wire{
 	}
 	
 	public void addExtension() {
-		if(verticalSegment.getX1() == getLastSegment().getX2() && verticalSegment.getY1() == getLastSegment().getY2()) {
+		System.out.println(endNode);
+		if(verticalSegment.getX1() == startx && verticalSegment.getY1() == starty) {
 			segments.add(verticalSegment);
 			segments.add(horizontalSegment);
+			if(endNode == null) {
+				endNode = new Node(horizontalSegment.getX2(),horizontalSegment.getY2(),value,true,this);
+				endNodeLocal = true;
+			}
 		}
 		else {
 			segments.add(horizontalSegment);
 			segments.add(verticalSegment);
+			if(endNode == null) {
+				endNode = new Node(verticalSegment.getX2(),verticalSegment.getY2(),0,true,this);
+				endNodeLocal = true;
+			}
 		}
+		System.out.println(endNode);
 		//Reset segments
-		verticalSegment = new Line(startx, starty, startx, starty);
-		horizontalSegment = verticalSegment;
-		horizontalPrimary = false;
+//		verticalSegment = new Line(startx, starty, startx, starty);
+//		horizontalSegment = verticalSegment;
+//		horizontalPrimary = false;
+	}
+	
+	//Returns the direction the end of the wire is pointing
+	//Mostly for use in Node.getParentOrientation()
+	public int getPointDirection() {
+		if((horizontalPrimary || horizontalSegment.length() == 0) && verticalSegment.length() != 0) {
+			if(verticalSegment.getY1() < verticalSegment.getY2()) {
+				return CircuitElement.DOWN;
+			}
+			else {
+				return CircuitElement.UP;
+			}
+		}
+		else {
+			if(horizontalSegment.getX1() < horizontalSegment.getX2()) {
+				return CircuitElement.RIGHT;
+			}
+			else {
+				return CircuitElement.LEFT;
+			}
+		}
 	}
 	
 	public void updateValue() {
@@ -190,4 +225,9 @@ public class Wire{
 		if(endNode != null && !endNode.isOutput) 
 		endNode.updateValue(value);
 	}
+	
+	public String toString() {
+		return "Wire [(" + startx + "," + starty + ")->(" + endNode.getX() + "," + endNode.getY() + ")]"; 
+	}
+
 }
